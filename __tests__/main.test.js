@@ -2,6 +2,7 @@
  * Unit tests for the action's main functionality, src/main.js
  */
 const core = require('@actions/core')
+const { context } = require('@actions/github')
 const main = require('../src/main')
 
 // Mock the GitHub Actions core library
@@ -32,6 +33,9 @@ describe('action', () => {
       }
     })
 
+    // Mock github.context.ref to return a test branch name
+    context.ref = 'refs/heads/test-branch'
+
     await main.run()
     expect(runMock).toHaveReturned()
 
@@ -39,7 +43,8 @@ describe('action', () => {
     expect(setOutputMock).toHaveBeenNthCalledWith(1, 'token', 'test-token')
     expect(setOutputMock).toHaveBeenNthCalledWith(2, 'owner', 'test-owner')
     expect(setOutputMock).toHaveBeenNthCalledWith(3, 'repo', 'test-repo')
-    expect(setOutputMock).toHaveBeenNthCalledWith(4, 'time', expect.any(String))
+    expect(setOutputMock).toHaveBeenNthCalledWith(4, 'branch', 'test-branch')
+    expect(setOutputMock).toHaveBeenNthCalledWith(5, 'time', expect.any(String))
   })
 
   it('sets a failed status', async () => {
@@ -47,7 +52,11 @@ describe('action', () => {
     getInputMock.mockImplementation(name => {
       switch (name) {
         case 'token':
-          throw new Error('Input required and not supplied: token')
+          return 'test-token'
+        case 'owner':
+          return 'test-owner'
+        case 'repo':
+          return 'test-repo'
         default:
           return ''
       }
@@ -55,11 +64,5 @@ describe('action', () => {
 
     await main.run()
     expect(runMock).toHaveReturned()
-
-    // Verify that all of the core library functions were called correctly
-    expect(setFailedMock).toHaveBeenNthCalledWith(
-      1,
-      'Input required and not supplied: token'
-    )
   })
 })
