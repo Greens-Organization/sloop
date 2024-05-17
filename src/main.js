@@ -16,7 +16,8 @@ async function run() {
     const ref = github.context.ref
     // const branch = ref.replace('refs/heads/', '')
 
-    const branch = 'fix/switch-header-and-footer'
+    // const branch = 'fix/switch-header-and-footer'
+    const branch = 'switch-header-and-footer'
 
     // Request for github
     const octokit = new Octokit({ auth: token })
@@ -38,6 +39,10 @@ async function run() {
         return deployment
       }
     })
+
+    if (!findDeployment) {
+      throw new Error(`No deployment found for branch: ${branch}`)
+    }
 
     console.log(findDeployment)
 
