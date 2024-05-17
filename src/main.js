@@ -26,11 +26,10 @@ async function changeStatusDeployment(octokit, owner, repo, id) {
         state
       }
     }
-  );
+  )
 
-  console.log('Change status', reponse);
 
-  return response.status === 200
+  return response
 }
 
 async function run() {
