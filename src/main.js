@@ -28,7 +28,6 @@ async function changeStatusDeployment(octokit, owner, repo, id) {
     }
   )
 
-
   return response
 }
 
