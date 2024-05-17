@@ -28,7 +28,11 @@ async function run() {
 
     const deployments = response.data
 
-    console.log(deployments)
+    const findDeployment = deployments.find(
+      deployment => deployment.ref === branch
+    )
+
+    console.log(findDeployment)
 
     // Log the branch name to the console
     console.log(`Branch: ${branch}`)
