@@ -1,64 +1,98 @@
-/**
- * Unit tests for the action's main functionality, src/main.js
- */
 const core = require('@actions/core')
-const { context } = require('@actions/github')
+const github = require('@actions/github')
+const { Octokit } = require('@octokit/core')
 const main = require('../src/main')
 
-// Mock the GitHub Actions core library
-const getInputMock = jest.spyOn(core, 'getInput').mockImplementation()
-const setFailedMock = jest.spyOn(core, 'setFailed').mockImplementation()
-const setOutputMock = jest.spyOn(core, 'setOutput').mockImplementation()
+jest.mock('@actions/core')
+jest.mock('@actions/github', () => ({
+  context: {
+    ref: 'refs/heads/test-branch'
+  }
+}))
+jest.mock('@octokit/core')
 
-// Mock the action's main function
-const runMock = jest.spyOn(main, 'run')
+describe('run function', () => {
+  let getInputMock
+  let setOutputMock
+  let setFailedMock
+  let octokitMock
 
-describe('action', () => {
   beforeEach(() => {
+    getInputMock = core.getInput.mockImplementation(name => {
+      switch (name) {
+        case 'token':
+          return 'test-token'
+        case 'owner':
+          return 'test-owner'
+        case 'repo':
+          return 'test-repo'
+        default:
+          return ''
+      }
+    })
+
+    setOutputMock = core.setOutput.mockImplementation()
+    setFailedMock = core.setFailed.mockImplementation()
+
+    octokitMock = {
+      request: jest.fn()
+    }
+
+    Octokit.mockImplementation(() => octokitMock)
+
+    github.context.ref = 'refs/heads/test-branch'
+  })
+
+  afterEach(() => {
     jest.clearAllMocks()
   })
 
-  it('sets the correct outputs', async () => {
-    // Set the action's inputs as return values from core.getInput()
-    getInputMock.mockImplementation(name => {
-      switch (name) {
-        case 'token':
-          return 'test-token'
-        case 'owner':
-          return 'test-owner'
-        case 'repo':
-          return 'test-repo'
-        default:
-          return ''
-      }
+  it('should set the correct outputs', async () => {
+    octokitMock.request.mockResolvedValueOnce({
+      data: [
+        {
+          id: 1,
+          ref: 'fix/switch-header-and-footer'
+        }
+      ]
+    })
+    octokitMock.request.mockResolvedValueOnce({
+      status: 200
     })
 
-    // Mock github.context.ref to return a test branch name
-    context.ref = 'refs/heads/test-branch'
-
     await main.run()
-    expect(runMock).toHaveReturned()
 
-    // Verify that all of the core library functions were called correctly
-    // expect(setOutputMock).toHaveBeenNthCalledWith(1, 'time', expect.any(String))
+    expect(getInputMock).toHaveBeenCalledWith('token', { required: true })
+    expect(getInputMock).toHaveBeenCalledWith('owner', { required: true })
+    expect(getInputMock).toHaveBeenCalledWith('repo', { required: true })
+    expect(octokitMock.request).toHaveBeenCalledWith(
+      'GET /repos/{owner}/{repo}/deployments',
+      {
+        owner: 'test-owner',
+        repo: 'test-repo'
+      }
+    )
+    expect(octokitMock.request).toHaveBeenCalledWith(
+      'POST /repos/{owner}/{repo}/deployments/{id}/statuses',
+      {
+        owner: 'test-owner',
+        repo: 'test-repo',
+        id: 1,
+        data: { state: 'inactive' }
+      }
+    )
+    expect(setOutputMock).toHaveBeenCalledWith('time', expect.any(String))
   })
 
-  it('sets a failed status', async () => {
-    // Set the action's inputs as return values from core.getInput()
-    getInputMock.mockImplementation(name => {
-      switch (name) {
-        case 'token':
-          return 'test-token'
-        case 'owner':
-          return 'test-owner'
-        case 'repo':
-          return 'test-repo'
-        default:
-          return ''
-      }
+  it('should fail when no deployment is found for the branch', async () => {
+    octokitMock.request.mockResolvedValueOnce({
+      data: []
     })
 
     await main.run()
-    expect(runMock).toHaveReturned()
+
+    expect(setFailedMock).toHaveBeenCalledWith(
+      'No deployment found for branch: fix/switch-header-and-footer'
+    )
   })
 })

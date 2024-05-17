@@ -10,8 +10,7 @@ async function listDeployments(octokit, owner, repo) {
       repo
     }
   )
-
-  return response.data
+  return response.data || []
 }
 
 async function changeStatusDeployment(octokit, owner, repo, id) {
@@ -32,44 +31,32 @@ async function changeStatusDeployment(octokit, owner, repo, id) {
   return response.status === 200
 }
 
-/**
- * The main function for the action.
- * @returns {Promise<void>} Resolves when the action is complete.
- */
 async function run() {
   try {
     const token = core.getInput('token', { required: true })
     const owner = core.getInput('owner', { required: true })
     const repo = core.getInput('repo', { required: true })
 
-    // Get the branch that triggered the action
     const ref = github.context.ref
-    // const branch = ref.replace('refs/heads/', '')
-
     const branch = 'fix/switch-header-and-footer'
 
-    // Log the branch name to the console
     console.log(`Branch: ${branch}`)
 
-    // Request for github
     const octokit = new Octokit({ auth: token })
 
-    // List deployments for the repository
-    const deployments = listDeployments(octokit, owner, repo)
+    const deployments = await listDeployments(octokit, owner, repo)
     const currentBranchDeployment = deployments.find(deployment => {
       console.log('deployment', deployment.ref)
       console.log('branch', branch)
 
-      if (deployment.ref === branch) {
-        return deployment
-      }
+      return deployment.ref === branch
     })
 
     if (!currentBranchDeployment) {
       throw new Error(`No deployment found for branch: ${branch}`)
     }
 
-    const result = changeStatusDeployment(
+    const result = await changeStatusDeployment(
       octokit,
       owner,
       repo,
@@ -78,14 +65,14 @@ async function run() {
 
     console.log('Result change status', result)
 
-    // Set outputs for other workflow steps to use
     core.setOutput('time', new Date().toTimeString())
   } catch (error) {
-    // Fail the workflow run if an error occurs
     core.setFailed(error.message)
   }
 }
 
 module.exports = {
-  run
+  run,
+  listDeployments,
+  changeStatusDeployment
 }
