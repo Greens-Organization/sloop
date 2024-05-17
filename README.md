@@ -166,7 +166,9 @@ steps:
     id: test-action
     uses: ./
     with:
-      milliseconds: 1000
+      token: ${{ secrets.TOKEN_GITHUB }}
+      owner: 'org-name'
+      repo: 'repo-name'
 
   - name: Print Output
     id: output

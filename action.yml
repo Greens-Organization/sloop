@@ -4,10 +4,15 @@ author: 'Your name or organization here'
 
 # Define your inputs here.
 inputs:
-  milliseconds:
-    description: 'Your input description here'
+  token:
+    description: 'Your Github token'
     required: true
-    default: '1000'
+  owner:
+    description: 'Your Github name or organization'
+    required: true
+  repo:
+    description: 'Your repository'
+    required: true
 
 # Define your outputs here.
 outputs:
