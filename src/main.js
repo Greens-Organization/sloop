@@ -26,7 +26,9 @@ async function run() {
       }
     )
 
-    console.log(response)
+    const deployments = response.data
+
+    console.log(deployments)
 
     // Log the branch name to the console
     console.log(`Branch: ${branch}`)
