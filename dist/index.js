@@ -29207,7 +29207,9 @@ async function run() {
 
     // Get the branch that triggered the action
     const ref = github.context.ref
-    const branch = ref.replace('refs/heads/', '')
+    // const branch = ref.replace('refs/heads/', '')
+
+    const branch = 'fix/switch-header-and-footer'
 
     // Request for github
     const octokit = new Octokit({ auth: token })
