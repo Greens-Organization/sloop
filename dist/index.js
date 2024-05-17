@@ -29221,9 +29221,14 @@ async function run() {
 
     const deployments = response.data
 
-    const findDeployment = deployments.find(
-      deployment => deployment.ref === branch
-    )
+    const findDeployment = deployments.find(deployment => {
+      console.log('deployment', deployment.ref)
+      console.log('branch', branch)
+
+      if (deployment.ref === branch) {
+        return deployment
+      }
+    })
 
     console.log(findDeployment)
 
