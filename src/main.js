@@ -26,7 +26,7 @@ async function run() {
       }
     )
 
-    console.log(`Response: ${response}`)
+    console.log(response)
 
     // Log the branch name to the console
     console.log(`Branch: ${branch}`)
