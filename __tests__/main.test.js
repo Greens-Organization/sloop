@@ -92,7 +92,7 @@ describe('run function', () => {
     await main.run()
 
     expect(setFailedMock).toHaveBeenCalledWith(
-      'No deployment found for branch: fix/switch-header-and-footer'
+      'No deployment found for branch: test/deployment-delete'
     )
   })
 })
