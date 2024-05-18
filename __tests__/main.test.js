@@ -57,7 +57,7 @@ describe('GitHub Action', () => {
       data: [
         {
           id: 1,
-          ref: 'test/deployment-delete'
+          ref: 'test-branch'
         }
       ]
     })
@@ -97,6 +97,7 @@ describe('GitHub Action', () => {
         id: 1
       }
     )
+    expect(setOutputMock).toHaveBeenCalledWith('result', true)
     expect(setOutputMock).toHaveBeenCalledWith('time', expect.any(String))
   })
 
@@ -108,12 +109,12 @@ describe('GitHub Action', () => {
     await run()
 
     expect(setFailedMock).toHaveBeenCalledWith(
-      'No deployment found for branch: test/deployment-delete'
+      'No deployment found for branch: test-branch'
     )
   })
 
   it('should list deployments', async () => {
-    const deployments = [{ id: 1, ref: 'test/deployment-delete' }]
+    const deployments = [{ id: 1, ref: 'test-branch' }]
     octokitMock.request.mockResolvedValueOnce({ data: deployments })
 
     const result = await listDeployments(octokitMock, 'test-owner', 'test-repo')
@@ -160,7 +161,7 @@ describe('GitHub Action', () => {
       1
     )
 
-    expect(result.status).toBe(204)
+    expect(result).toBe(true)
     expect(octokitMock.request).toHaveBeenCalledWith(
       'DELETE /repos/{owner}/{repo}/deployments/{id}',
       {
@@ -169,5 +170,46 @@ describe('GitHub Action', () => {
         id: 1
       }
     )
+  })
+
+  it('should throw an error if changing deployment status fails', async () => {
+    octokitMock.request.mockResolvedValueOnce({
+      data: [
+        {
+          id: 1,
+          ref: 'test-branch'
+        }
+      ]
+    })
+    octokitMock.request.mockResolvedValueOnce({
+      status: 500
+    })
+
+    await run()
+
+    expect(setFailedMock).toHaveBeenCalledWith(
+      'Error changing status deployment'
+    )
+  })
+
+  it('should throw an error if deleting deployment fails', async () => {
+    octokitMock.request.mockResolvedValueOnce({
+      data: [
+        {
+          id: 1,
+          ref: 'test-branch'
+        }
+      ]
+    })
+    octokitMock.request.mockResolvedValueOnce({
+      status: 201
+    })
+    octokitMock.request.mockResolvedValueOnce({
+      status: 500
+    })
+
+    await run()
+
+    expect(setFailedMock).toHaveBeenCalledWith('Error deleting deployment')
   })
 })

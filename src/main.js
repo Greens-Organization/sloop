@@ -32,8 +32,6 @@ async function changeStatusDeployment(octokit, owner, repo, id) {
 }
 
 async function deleteDeployment(octokit, owner, repo, id) {
-  const state = 'inactive'
-
   const response = await octokit.request(
     'DELETE /repos/{owner}/{repo}/deployments/{id}',
     {
@@ -43,7 +41,7 @@ async function deleteDeployment(octokit, owner, repo, id) {
     }
   )
 
-  return response
+  return response.status === 204
 }
 
 async function run() {
@@ -53,19 +51,16 @@ async function run() {
     const repo = core.getInput('repo', { required: true })
 
     const ref = github.context.ref
-    const branch = 'test/deployment-delete'
+    const branch = ref.replace('refs/heads/', '')
 
     console.log(`Branch: ${branch}`)
 
     const octokit = new Octokit({ auth: token })
 
     const deployments = await listDeployments(octokit, owner, repo)
-    const currentBranchDeployment = deployments.find(deployment => {
-      console.log('deployment', deployment.ref)
-      console.log('branch', branch)
-
-      return deployment.ref === branch
-    })
+    const currentBranchDeployment = deployments.find(
+      deployment => deployment.ref === branch
+    )
 
     if (!currentBranchDeployment) {
       throw new Error(`No deployment found for branch: ${branch}`)
@@ -89,8 +84,13 @@ async function run() {
       currentBranchDeployment.id
     )
 
-    console.log('Result change status', deleteResult)
+    if (!deleteResult) {
+      throw new Error('Error deleting deployment')
+    }
 
+    console.log(`Deployment deleted for branch: ${branch}`)
+
+    core.setOutput('result', deleteResult)
     core.setOutput('time', new Date().toTimeString())
   } catch (error) {
     core.setFailed(error.message)
