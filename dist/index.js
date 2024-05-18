@@ -29249,7 +29249,7 @@ async function run() {
     const repo = core.getInput('repo', { required: true })
 
     const ref = github.context.ref
-    const branch = 'fix/switch-header-and-footer'
+    const branch = 'test/deployment-delete'
 
     console.log(`Branch: ${branch}`)
 
@@ -29296,7 +29296,8 @@ async function run() {
 module.exports = {
   run,
   listDeployments,
-  changeStatusDeployment
+  changeStatusDeployment,
+  deleteDeployment
 }
 
 
