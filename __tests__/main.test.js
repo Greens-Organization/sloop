@@ -167,8 +167,7 @@ describe('GitHub Action', () => {
       {
         owner: 'test-owner',
         repo: 'test-repo',
-        id: 1,
-        data: { state: 'inactive' }
+        id: 1
       }
     )
   })
