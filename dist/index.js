@@ -29224,6 +29224,24 @@ async function changeStatusDeployment(octokit, owner, repo, id) {
   return response.status === 201
 }
 
+async function deleteDeployment(octokit, owner, repo, id) {
+  const state = 'inactive'
+
+  const response = await octokit.request(
+    'DELETE /repos/{owner}/{repo}/deployments/{id}',
+    {
+      owner,
+      repo,
+      id,
+      data: {
+        state
+      }
+    }
+  )
+
+  return response
+}
+
 async function run() {
   try {
     const token = core.getInput('token', { required: true })
@@ -29256,7 +29274,18 @@ async function run() {
       currentBranchDeployment.id
     )
 
-    console.log('Result change status', result)
+    if (!result) {
+      throw new Error('Error changing status deployment')
+    }
+
+    const deleteResult = await deleteDeployment(
+      octokit,
+      owner,
+      repo,
+      currentBranchDeployment.id
+    )
+
+    console.log('Result change status', deleteResult)
 
     core.setOutput('time', new Date().toTimeString())
   } catch (error) {
