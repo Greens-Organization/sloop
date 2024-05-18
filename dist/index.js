@@ -29232,10 +29232,7 @@ async function deleteDeployment(octokit, owner, repo, id) {
     {
       owner,
       repo,
-      id,
-      data: {
-        state
-      }
+      id
     }
   )
 
