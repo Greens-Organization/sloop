@@ -15,7 +15,7 @@ steps:
 
   - name: Run my Action
     id: run-action
-    uses: actions/sloop@v1
+    uses: actions/sloop-launch@v1
     with:
       token: ${{ secrets.TOKEN_GITHUB }}
       owner: 'org-name'
