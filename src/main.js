@@ -103,5 +103,6 @@ async function run() {
 module.exports = {
   run,
   listDeployments,
-  changeStatusDeployment
+  changeStatusDeployment,
+  deleteDeployment
 }

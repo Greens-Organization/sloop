@@ -1,7 +1,12 @@
 const core = require('@actions/core')
 const github = require('@actions/github')
 const { Octokit } = require('@octokit/core')
-const main = require('../src/main')
+const {
+  run,
+  listDeployments,
+  changeStatusDeployment,
+  deleteDeployment
+} = require('../src/main')
 
 jest.mock('@actions/core')
 jest.mock('@actions/github', () => ({
@@ -11,7 +16,7 @@ jest.mock('@actions/github', () => ({
 }))
 jest.mock('@octokit/core')
 
-describe('run function', () => {
+describe('GitHub Action', () => {
   let getInputMock
   let setOutputMock
   let setFailedMock
@@ -52,15 +57,18 @@ describe('run function', () => {
       data: [
         {
           id: 1,
-          ref: 'fix/switch-header-and-footer'
+          ref: 'test/deployment-delete'
         }
       ]
     })
     octokitMock.request.mockResolvedValueOnce({
-      status: 200
+      status: 201
+    })
+    octokitMock.request.mockResolvedValueOnce({
+      status: 204
     })
 
-    await main.run()
+    await run()
 
     expect(getInputMock).toHaveBeenCalledWith('token', { required: true })
     expect(getInputMock).toHaveBeenCalledWith('owner', { required: true })
@@ -81,7 +89,16 @@ describe('run function', () => {
         data: { state: 'inactive' }
       }
     )
-    // expect(setOutputMock).toHaveBeenCalledWith('time', expect.any(String))
+    expect(octokitMock.request).toHaveBeenCalledWith(
+      'DELETE /repos/{owner}/{repo}/deployments/{id}',
+      {
+        owner: 'test-owner',
+        repo: 'test-repo',
+        id: 1,
+        data: { state: 'inactive' }
+      }
+    )
+    expect(setOutputMock).toHaveBeenCalledWith('time', expect.any(String))
   })
 
   it('should fail when no deployment is found for the branch', async () => {
@@ -89,10 +106,70 @@ describe('run function', () => {
       data: []
     })
 
-    await main.run()
+    await run()
 
     expect(setFailedMock).toHaveBeenCalledWith(
       'No deployment found for branch: test/deployment-delete'
+    )
+  })
+
+  it('should list deployments', async () => {
+    const deployments = [{ id: 1, ref: 'test/deployment-delete' }]
+    octokitMock.request.mockResolvedValueOnce({ data: deployments })
+
+    const result = await listDeployments(octokitMock, 'test-owner', 'test-repo')
+
+    expect(result).toEqual(deployments)
+    expect(octokitMock.request).toHaveBeenCalledWith(
+      'GET /repos/{owner}/{repo}/deployments',
+      {
+        owner: 'test-owner',
+        repo: 'test-repo'
+      }
+    )
+  })
+
+  it('should change deployment status', async () => {
+    octokitMock.request.mockResolvedValueOnce({ status: 201 })
+
+    const result = await changeStatusDeployment(
+      octokitMock,
+      'test-owner',
+      'test-repo',
+      1
+    )
+
+    expect(result).toBe(true)
+    expect(octokitMock.request).toHaveBeenCalledWith(
+      'POST /repos/{owner}/{repo}/deployments/{id}/statuses',
+      {
+        owner: 'test-owner',
+        repo: 'test-repo',
+        id: 1,
+        data: { state: 'inactive' }
+      }
+    )
+  })
+
+  it('should delete deployment', async () => {
+    octokitMock.request.mockResolvedValueOnce({ status: 204 })
+
+    const result = await deleteDeployment(
+      octokitMock,
+      'test-owner',
+      'test-repo',
+      1
+    )
+
+    expect(result.status).toBe(204)
+    expect(octokitMock.request).toHaveBeenCalledWith(
+      'DELETE /repos/{owner}/{repo}/deployments/{id}',
+      {
+        owner: 'test-owner',
+        repo: 'test-repo',
+        id: 1,
+        data: { state: 'inactive' }
+      }
     )
   })
 })
