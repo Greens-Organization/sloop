@@ -1,6 +1,6 @@
-name: 'The name of your action here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: 'Sloop'
+description: 'Remove deployments from the deleted branch'
+author: 'themath123'
 
 # Define your inputs here.
 inputs:
@@ -16,6 +16,8 @@ inputs:
 
 # Define your outputs here.
 outputs:
+  result:
+    description: 'If action ended successfully, return true or false'
   time:
     description: 'Your output description here'
 
