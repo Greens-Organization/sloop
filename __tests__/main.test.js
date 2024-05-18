@@ -94,8 +94,7 @@ describe('GitHub Action', () => {
       {
         owner: 'test-owner',
         repo: 'test-repo',
-        id: 1,
-        data: { state: 'inactive' }
+        id: 1
       }
     )
     expect(setOutputMock).toHaveBeenCalledWith('time', expect.any(String))
