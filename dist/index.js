@@ -29221,7 +29221,7 @@ async function changeStatusDeployment(octokit, owner, repo, id) {
     }
   )
 
-  return response
+  return response.status === 201
 }
 
 async function run() {
