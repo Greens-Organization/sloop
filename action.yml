@@ -1,8 +1,9 @@
 name: 'Sloop Launch'
 description: 'Remove deployments from the deleted branch'
 author: 'themath123'
-icon: 'anchor'
-color: 'green'
+branding:
+  icon: 'anchor'
+  color: 'green'
 
 # Define your inputs here.
 inputs:
