@@ -58,8 +58,8 @@ jobs:
         uses: ./
         with:
           token: ${{ secrets.TOKEN_GITHUB }}
-          owner: 'saleshubdev'
-          repo: 'shop'
+          owner: 'greens'
+          repo: 'repo'
 
       - name: Print Output
         id: output
