@@ -1,5 +1,5 @@
 import { getInput, setFailed, setOutput } from '@actions/core'
-import { context } from '@actions/github'
+import { context as githubContext } from '@actions/github'
 import { Octokit } from '@octokit/core'
 
 export async function listDeployments(octokit, owner, repo) {
@@ -50,8 +50,7 @@ export async function run() {
     const owner = getInput('owner', { required: true })
     const repo = getInput('repo', { required: true })
 
-    const ref = context.ref
-    const branch = ref.replace('refs/heads/', '')
+    const branch = githubContext.payload.pull_request.head.ref
 
     console.log(`Branch: ${branch}`)
 

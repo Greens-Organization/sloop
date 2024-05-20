@@ -1,5 +1,5 @@
 import { getInput, setFailed } from '@actions/core'
-import { context as _context } from '@actions/github'
+import { context as githubContext } from '@actions/github'
 import { Octokit } from '@octokit/core'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
@@ -33,7 +33,13 @@ vi.mock('@actions/github', async importActual => {
   return {
     ...actual,
     context: {
-      ref: 'refs/heads/test-branch'
+      payload: {
+        pull_request: {
+          head: {
+            ref: 'test-branch'
+          }
+        }
+      }
     }
   }
 })
@@ -48,8 +54,6 @@ describe('GitHub Action', () => {
     }
 
     Octokit.mockImplementation(() => octokitMock)
-
-    _context.ref = 'refs/heads/test-branch'
   })
 
   afterEach(() => {
