@@ -163,7 +163,6 @@ describe('GitHub Action', () => {
   })
 
   it('should throw an error if deleting deployment fails', async () => {
-    // Simula a resposta para listar as implantações
     octokitMock.request.mockResolvedValueOnce({
       data: [
         {
@@ -172,11 +171,9 @@ describe('GitHub Action', () => {
         }
       ]
     })
-    // Simula a resposta para mudar o status da implantação
     octokitMock.request.mockResolvedValueOnce({
       status: 201
     })
-    // Simula a resposta para deletar a implantação
     octokitMock.request.mockResolvedValueOnce({
       status: 500
     })
