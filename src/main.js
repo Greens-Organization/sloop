@@ -1,8 +1,8 @@
-const core = require('@actions/core')
-const github = require('@actions/github')
-const { Octokit } = require('@octokit/core')
+import { getInput, setFailed, setOutput } from '@actions/core'
+import { context } from '@actions/github'
+import { Octokit } from '@octokit/core'
 
-async function listDeployments(octokit, owner, repo) {
+export async function listDeployments(octokit, owner, repo) {
   const response = await octokit.request(
     'GET /repos/{owner}/{repo}/deployments',
     {
@@ -13,7 +13,7 @@ async function listDeployments(octokit, owner, repo) {
   return response.data || []
 }
 
-async function changeStatusDeployment(octokit, owner, repo, id) {
+export async function changeStatusDeployment(octokit, owner, repo, id) {
   const state = 'inactive'
 
   const response = await octokit.request(
@@ -31,7 +31,7 @@ async function changeStatusDeployment(octokit, owner, repo, id) {
   return response.status === 201
 }
 
-async function deleteDeployment(octokit, owner, repo, id) {
+export async function deleteDeployment(octokit, owner, repo, id) {
   const response = await octokit.request(
     'DELETE /repos/{owner}/{repo}/deployments/{id}',
     {
@@ -44,13 +44,13 @@ async function deleteDeployment(octokit, owner, repo, id) {
   return response.status === 204
 }
 
-async function run() {
+export async function run() {
   try {
-    const token = core.getInput('token', { required: true })
-    const owner = core.getInput('owner', { required: true })
-    const repo = core.getInput('repo', { required: true })
+    const token = getInput('token', { required: true })
+    const owner = getInput('owner', { required: true })
+    const repo = getInput('repo', { required: true })
 
-    const ref = github.context.ref
+    const ref = context.ref
     const branch = ref.replace('refs/heads/', '')
 
     console.log(`Branch: ${branch}`)
@@ -90,16 +90,9 @@ async function run() {
 
     console.log(`Deployment deleted for branch: ${branch}`)
 
-    core.setOutput('result', deleteResult)
-    core.setOutput('time', new Date().toTimeString())
+    setOutput('result', deleteResult)
+    setOutput('time', new Date().toTimeString())
   } catch (error) {
-    core.setFailed(error.message)
+    setFailed(error.message)
   }
-}
-
-module.exports = {
-  run,
-  listDeployments,
-  changeStatusDeployment,
-  deleteDeployment
 }
