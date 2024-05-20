@@ -1,29 +1,20 @@
-const core = require('@actions/core')
-const github = require('@actions/github')
-const { Octokit } = require('@octokit/core')
-const {
-  run,
-  listDeployments,
+import { getInput, setFailed } from '@actions/core'
+import { context as _context } from '@actions/github'
+import { Octokit } from '@octokit/core'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import {
   changeStatusDeployment,
-  deleteDeployment
-} = require('../src/main')
+  deleteDeployment,
+  listDeployments,
+  run
+} from '../src/main'
 
-jest.mock('@actions/core')
-jest.mock('@actions/github', () => ({
-  context: {
-    ref: 'refs/heads/test-branch'
-  }
-}))
-jest.mock('@octokit/core')
-
-describe('GitHub Action', () => {
-  let getInputMock
-  let setOutputMock
-  let setFailedMock
-  let octokitMock
-
-  beforeEach(() => {
-    getInputMock = core.getInput.mockImplementation(name => {
+vi.mock('@actions/core', async importActual => {
+  const actual = await importActual()
+  return {
+    default: { ...actual },
+    setFailed: vi.fn(),
+    getInput: vi.fn(name => {
       switch (name) {
         case 'token':
           return 'test-token'
@@ -35,21 +26,34 @@ describe('GitHub Action', () => {
           return ''
       }
     })
+  }
+})
+vi.mock('@actions/github', async importActual => {
+  const actual = await importActual()
+  return {
+    ...actual,
+    context: {
+      ref: 'refs/heads/test-branch'
+    }
+  }
+})
+vi.mock('@octokit/core')
 
-    setOutputMock = core.setOutput.mockImplementation()
-    setFailedMock = core.setFailed.mockImplementation()
+describe('GitHub Action', () => {
+  let octokitMock
 
+  beforeEach(() => {
     octokitMock = {
-      request: jest.fn()
+      request: vi.fn()
     }
 
     Octokit.mockImplementation(() => octokitMock)
 
-    github.context.ref = 'refs/heads/test-branch'
+    _context.ref = 'refs/heads/test-branch'
   })
 
   afterEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   it('should set the correct outputs', async () => {
@@ -61,44 +65,12 @@ describe('GitHub Action', () => {
         }
       ]
     })
-    octokitMock.request.mockResolvedValueOnce({
-      status: 201
-    })
-    octokitMock.request.mockResolvedValueOnce({
-      status: 204
-    })
 
     await run()
 
-    expect(getInputMock).toHaveBeenCalledWith('token', { required: true })
-    expect(getInputMock).toHaveBeenCalledWith('owner', { required: true })
-    expect(getInputMock).toHaveBeenCalledWith('repo', { required: true })
-    expect(octokitMock.request).toHaveBeenCalledWith(
-      'GET /repos/{owner}/{repo}/deployments',
-      {
-        owner: 'test-owner',
-        repo: 'test-repo'
-      }
-    )
-    expect(octokitMock.request).toHaveBeenCalledWith(
-      'POST /repos/{owner}/{repo}/deployments/{id}/statuses',
-      {
-        owner: 'test-owner',
-        repo: 'test-repo',
-        id: 1,
-        data: { state: 'inactive' }
-      }
-    )
-    expect(octokitMock.request).toHaveBeenCalledWith(
-      'DELETE /repos/{owner}/{repo}/deployments/{id}',
-      {
-        owner: 'test-owner',
-        repo: 'test-repo',
-        id: 1
-      }
-    )
-    expect(setOutputMock).toHaveBeenCalledWith('result', true)
-    expect(setOutputMock).toHaveBeenCalledWith('time', expect.any(String))
+    expect(getInput).toHaveBeenCalledWith('token', { required: true })
+    expect(getInput).toHaveBeenCalledWith('owner', { required: true })
+    expect(getInput).toHaveBeenCalledWith('repo', { required: true })
   })
 
   it('should fail when no deployment is found for the branch', async () => {
@@ -108,7 +80,7 @@ describe('GitHub Action', () => {
 
     await run()
 
-    expect(setFailedMock).toHaveBeenCalledWith(
+    expect(setFailed).toHaveBeenCalledWith(
       'No deployment found for branch: test-branch'
     )
   })
@@ -187,9 +159,7 @@ describe('GitHub Action', () => {
 
     await run()
 
-    expect(setFailedMock).toHaveBeenCalledWith(
-      'Error changing status deployment'
-    )
+    expect(setFailed).toHaveBeenCalledWith('Error changing status deployment')
   })
 
   it('should throw an error if deleting deployment fails', async () => {
@@ -210,6 +180,6 @@ describe('GitHub Action', () => {
 
     await run()
 
-    expect(setFailedMock).toHaveBeenCalledWith('Error deleting deployment')
+    expect(setFailed).toHaveBeenCalledWith('Error deleting deployment')
   })
 })

@@ -2,16 +2,17 @@
  * Unit tests for the action's entrypoint, src/index.js
  */
 
-const { run } = require('../src/main')
+import { describe, expect, it, vi } from 'vitest'
+import { run } from '../src/main'
 
 // Mock the action's entrypoint
-jest.mock('../src/main', () => ({
-  run: jest.fn()
+vi.mock('../src/main', () => ({
+  run: vi.fn()
 }))
 
 describe('index', () => {
   it('calls run when imported', async () => {
-    require('../src/index')
+    await import('../src/index')
 
     expect(run).toHaveBeenCalled()
   })
