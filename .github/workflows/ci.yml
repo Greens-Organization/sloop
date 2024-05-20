@@ -58,8 +58,8 @@ jobs:
         uses: ./
         with:
           token: ${{ secrets.TOKEN_GITHUB }}
-          owner: 'greens'
-          repo: 'repo'
+          owner: 'Greens-Organization'
+          repo: 'sloop'
 
       - name: Print Output
         id: output
