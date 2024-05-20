@@ -52,7 +52,6 @@
     "@vitest/coverage-v8": "^1.6.0",
     "eslint": "^8.57.0",
     "eslint-plugin-github": "^4.10.2",
-    "eslint-plugin-jest": "^28.5.0",
     "make-coverage-badge": "^1.2.0",
     "prettier": "^3.2.5",
     "vitest": "^1.6.0"
