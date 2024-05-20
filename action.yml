@@ -1,6 +1,6 @@
 name: 'Sloop Launch'
 description: 'Remove deployments from the deleted branch'
-author: 'themath123'
+author: 'TheMath123'
 branding:
   icon: 'anchor'
   color: 'green'
