@@ -28,7 +28,7 @@ steps:
     run: echo "${{ steps.run-action.outputs.result }}"
 ```
 
-## Creation Personal access tokens
+## How to create the token
 
 You need to create a token to use the action, it must contain the following
 requirements.
