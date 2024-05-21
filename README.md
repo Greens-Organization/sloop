@@ -27,3 +27,29 @@ steps:
     id: output
     run: echo "${{ steps.run-action.outputs.result }}"
 ```
+
+## Creation Personal access tokens
+
+You need to create a token to use the action, it must contain the following
+requirements.
+
+**Path in Github:**
+
+```
+Settings / Developer settings / Personal access tokens / Fine-grained tokens
+```
+
+**Repository access:**
+
+- **All repositories** or **Only select repositories**.
+
+**Permissions:**
+
+- Administration: Read and write
+- Commit statuses: Read and write
+- Deployments: Read and write
+- Metadata(mandatory): Read-only
+
+**Organization permissions:**
+
+- Administration: Read and write
