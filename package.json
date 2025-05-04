@@ -45,15 +45,15 @@
     "@octokit/core": "^6.1.2"
   },
   "devDependencies": {
-    "@babel/core": "^7.24.5",
-    "@babel/eslint-parser": "^7.24.5",
-    "@babel/preset-env": "^7.24.5",
+    "@babel/core": "^7.25.2",
+    "@babel/eslint-parser": "^7.25.1",
+    "@babel/preset-env": "^7.25.3",
     "@vercel/ncc": "^0.38.1",
     "@vitest/coverage-v8": "^1.6.0",
     "eslint": "^8.57.0",
     "eslint-plugin-github": "^4.10.2",
     "make-coverage-badge": "^1.2.0",
-    "prettier": "^3.2.5",
+    "prettier": "^3.3.3",
     "vitest": "^1.6.0"
   }
 }
